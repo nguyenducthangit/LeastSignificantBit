@@ -1,0 +1,23 @@
+1.	text_to_bits: Chuyển đổi chuỗi thông điệp thành dạng nhị phân.
+2.	encode_image: Nhúng thông điệp nhị phân vào ảnh bằng cách thay đổi bit cuối của các giá trị màu RGB của từng pixel.
+3.	decode_image: Đọc lại thông điệp bằng cách lấy các bit cuối của các giá trị RGB, kết hợp chúng thành chuỗi nhị phân và chuyển lại thành chuỗi ký tự.
+
+Nhúng thông điệp:
+
+Mỗi pixel của ảnh được chia thành ba thành phần màu (đỏ, xanh lá, và xanh dương).
+Trong mỗi thành phần màu, giá trị của pixel được biểu diễn bằng 8 bit (ví dụ: 11110000).
+Kỹ thuật LSB sẽ thay thế bit cuối cùng (bit ít quan trọng nhất) của mỗi thành phần màu với các bit của thông điệp bí mật.
+Vì các thay đổi chỉ ảnh hưởng đến bit cuối cùng, sự thay đổi này là rất nhỏ và mắt thường khó nhận ra.
+Quy trình chạy code:
+
+Khi bạn chạy hàm encode_image, ảnh gốc sẽ được sao chép và các bit ít quan trọng của các pixel sẽ được thay đổi theo từng bit của thông điệp.
+Ảnh đầu ra (encoded_image.png) vẫn giữ nguyên các đặc điểm như ảnh gốc, nhưng chứa đựng thông điệp bí mật được mã hóa bên trong.
+Giải mã:
+
+Khi bạn chạy hàm decode_image, chương trình sẽ đọc các bit ít quan trọng từ từng pixel để tái tạo lại chuỗi nhị phân của thông điệp.
+Sau đó, chuỗi nhị phân sẽ được chuyển thành ký tự ASCII để phục hồi thông điệp gốc.
+Kết quả bạn nhận được sau khi chạy code
+Ảnh có chứa thông điệp mã hóa: encoded_image.png, ảnh này trông giống hệt ảnh gốc nhưng có chứa thông điệp.
+Thông điệp giải mã: Khi dùng hàm decode_image, bạn sẽ thấy nội dung của thông điệp bí mật được phục hồi và hiển thị ra.
+Ý nghĩa
+Kỹ thuật LSB giúp ẩn thông tin trong ảnh mà không thay đổi đáng kể đến hình ảnh. Đây là một kỹ thuật trong steganography, giúp truyền tải thông điệp bí mật mà không bị phát hiện dễ dàng.

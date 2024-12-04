@@ -1,0 +1,81 @@
+from PIL import Image  # Import thư viện Pillow để xử lý hình ảnh
+
+# Hàm chuyển đổi chuỗi thành chuỗi nhị phân
+def text_to_bits(text):
+    # Duyệt qua từng ký tự trong chuỗi và chuyển đổi thành mã nhị phân 8 bit, rồi nối lại thành một chuỗi nhị phân hoàn chỉnh
+    return ''.join([format(ord(i), "08b") for i in text])
+
+# Hàm nhúng thông điệp vào ảnh
+def encode_image(img_path, secret_message, output_path="encoded_image.png"):
+    # Mở ảnh từ đường dẫn `img_path` và chuyển sang chế độ màu RGB
+    img = Image.open(img_path)
+    img = img.convert("RGB")
+    encoded_pixels = img.load()  # Tải các pixel của ảnh để có thể chỉnh sửa từng pixel
+    
+    # Chuyển thông điệp thành chuỗi nhị phân và thêm chuỗi "1111111111111110" để đánh dấu kết thúc
+    binary_message = text_to_bits(secret_message) + '1111111111111110'
+    data_index = 0  # Chỉ mục để theo dõi vị trí của bit đang nhúng trong chuỗi nhị phân
+    
+    # Duyệt qua từng pixel theo hàng (y) và cột (x)
+    for y in range(img.height):
+        for x in range(img.width):
+            if data_index < len(binary_message):  # Kiểm tra xem còn bit nào trong thông điệp cần nhúng không
+                r, g, b = encoded_pixels[x, y]  # Lấy giá trị màu đỏ, xanh lá và xanh dương của pixel hiện tại
+                
+                # Thay đổi bit ít quan trọng nhất của màu đỏ để nhúng bit từ thông điệp
+                r = int(format(r, '08b')[:-1] + binary_message[data_index], 2)
+                data_index += 1  # Tăng chỉ mục sau khi nhúng 1 bit
+                if data_index < len(binary_message):  # Tiếp tục nhúng nếu còn bit trong thông điệp
+                    # Thay đổi bit ít quan trọng nhất của màu xanh lá
+                    g = int(format(g, '08b')[:-1] + binary_message[data_index], 2)
+                    data_index += 1  # Tăng chỉ mục sau khi nhúng 1 bit
+                if data_index < len(binary_message):  # Tiếp tục nhúng nếu còn bit trong thông điệp
+                    # Thay đổi bit ít quan trọng nhất của màu xanh dương
+                    b = int(format(b, '08b')[:-1] + binary_message[data_index], 2)
+                    data_index += 1  # Tăng chỉ mục sau khi nhúng 1 bit
+                
+                # Cập nhật pixel với giá trị màu đã thay đổi
+                encoded_pixels[x, y] = (r, g, b)
+            else:
+                break  # Thoát vòng lặp khi đã nhúng hết thông điệp
+
+    # Lưu ảnh đã nhúng thông điệp vào đường dẫn `output_path`
+    img.save(output_path)
+    print(f"Đã mã hóa thông điệp vào ảnh và lưu tại {output_path}")
+
+# Hàm giải mã thông điệp từ ảnh
+def decode_image(encoded_img_path):
+    # Mở ảnh đã mã hóa từ đường dẫn `encoded_img_path` và chuyển sang chế độ RGB
+    img = Image.open(encoded_img_path)
+    img = img.convert("RGB")
+    encoded_pixels = img.load()  # Tải các pixel của ảnh để đọc dữ liệu
+    
+    binary_message = ""  # Chuỗi để lưu trữ các bit nhị phân của thông điệp
+    
+    # Duyệt qua từng pixel theo hàng (y) và cột (x)
+    for y in range(img.height):
+        for x in range(img.width):
+            r, g, b = encoded_pixels[x, y]  # Lấy giá trị màu đỏ, xanh lá và xanh dương của pixel hiện tại
+            # Thêm bit cuối của từng màu vào `binary_message`
+            binary_message += format(r, '08b')[-1]  # Lấy bit ít quan trọng nhất của màu đỏ
+            binary_message += format(g, '08b')[-1]  # Lấy bit ít quan trọng nhất của màu xanh lá
+            binary_message += format(b, '08b')[-1]  # Lấy bit ít quan trọng nhất của màu xanh dương
+            
+            # Kiểm tra chuỗi "1111111111111110" để biết đã đến cuối thông điệp
+            if binary_message[-16:] == "1111111111111110":
+                break  # Thoát vòng lặp khi tìm thấy điểm kết thúc thông điệp
+
+    # Loại bỏ chuỗi đánh dấu kết thúc và chuyển đổi từ nhị phân về ký tự
+    binary_message = binary_message[:-16]  # Loại bỏ 16 bit cuối
+    # Chuyển từng nhóm 8 bit thành ký tự ASCII
+    decoded_message = ''.join([chr(int(binary_message[i:i+8], 2)) for i in range(0, len(binary_message), 8)])
+    
+    return decoded_message  # Trả về thông điệp đã giải mã
+
+# Sử dụng các hàm để mã hóa và giải mã thông điệp
+secret_message = "Hello, this is a secret message!"  # Thông điệp cần nhúng
+# Gọi hàm encode_image để nhúng thông điệp vào ảnh và lưu ảnh mới dưới tên "encoded_image.png"
+encode_image("C:/Users/nthan/Pictures/Saved Pictures/avatar.jpg", secret_message)
+# Gọi hàm decode_image để giải mã thông điệp từ ảnh đã được mã hóa
+decoded_message = decode_image("encoded_image.png")
+print("Thông điệp đã giải mã:", decoded_message)  # In ra thông điệp đã giải mã
