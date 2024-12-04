@@ -4,7 +4,7 @@ Image-Steganography-LSB is a command-line application that enables users to perf
 1. **Clone the Repository**: Clone this repository to your local machine using the following command:
 
    ```bash
-   git clone [github](https://github.com/nguyenducthangit/LeastSignificantBit.git)
+   git clone https://github.com/nguyenducthangit/LeastSignificantBit.git
    ```
 
 2. **Navigate to the Directory**: Move into the project directory:
